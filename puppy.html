@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Puppy Valentine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; }
+
+    /* ---------- Page shell ---------- */
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:#fff7fb;
+      color:#2f222a;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      padding:20px;
+    }
+
+    .card{
+      width:min(720px,96vw);
+      background:#fff3f8;
+      border:1px solid #f2d7e7;
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      padding:18px 18px 26px; /* more space at the bottom */
+      position: relative;
+    }
+
+    h1{
+      margin: 6px 0 10px;
+
+      font-family: "Caveat", cursive;
+
+      font-size: 27px;
+      font-weight: 700;
+
+      color: #c12a67;
+
+      letter-spacing: 0.02em;
+    }
+    .sub{
+      font-size: 13px; /* adjust this number */
+    }
+
+    .row{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+
+    .left{
+      flex: 1 1 360px;
+      min-width: 320px;
+      position: relative; /* needed for floating heart pops */
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .right{
+      flex: 0 1 240px;
+      min-width: 0;
+      max-width: 240px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+
+      /* align PET button with top of puppy screen */
+      padding-top: 37px;
+    }
+
+    /* ---------- Hearts line ---------- */
+    .hearts{
+      font-size:16px;
+      color:#d23b74;
+      letter-spacing:2px;
+      user-select:none;
+      margin:6px 0 10px;
+      min-height:22px;
+    }
+
+    /* ---------- Puppy screen ---------- */
+    #art{
+      margin:0;
+      padding:12px 14px;
+      background:
+        radial-gradient(120% 100% at 50% 60%,
+          rgba(180,210,235,0.12),
+          rgba(180,210,235,0.0) 60%
+        ),
+        linear-gradient(180deg,
+          #edf6ff 0%,
+          #f6fbff 60%,
+          #ffffff 100%
+        );
+      border-radius:14px;
+      border:1px solid rgba(120,170,210,0.35);
+      outline:1px solid rgba(255,255,255,0.6);
+      outline-offset:-4px;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.08),
+        0 2px 8px rgba(0,0,0,0.06);
+      font-family:"Cascadia Mono","Consolas",ui-monospace,SFMono-Regular,Menlo,Monaco,"Liberation Mono","Courier New",monospace;
+      font-size:15px;
+      line-height:1.18;
+      overflow-x:auto;
+      user-select:none;
+      min-height:220px;
+    }
+
+    /* puppy colors */
+    #art .p-brown{ color:#aa7e4d; }
+    #art .p-dark { color:#855b34; }
+    #art .p-black{ color:#3e2518; }
+
+    /* ---------- Pokémon-ish status ---------- */
+    .poke-status{
+      margin-top:10px;
+      padding:10px 12px;
+      border:1px solid #f6cfe0;
+      border-radius:12px;
+      background:#fffafc;
+      font-size:13px;
+      color:#4a3b44;
+      line-height:1.4;
+    }
+    .poke-status strong{ color:#c12a67; }
+
+    .hearts-bar{
+      display:inline-flex;
+      gap:2px;
+      margin-top:4px;
+      align-items:center;
+      vertical-align:middle;
+    }
+    .hearts-bar svg{ width:16px; height:16px; display:block; }
+
+    /* ---------- Bottom pills ---------- */
+    .status{
+      margin-top: 12px;
+      display:flex;
+      gap:12px;
+      justify-content:flex-start;
+    }
+
+    .pill{
+      background:#ffe1ee;
+      border:1px solid #f6cfe0;
+      padding:6px 10px;
+      border-radius:999px;
+      user-select:none;
+    }
+    .pill.turbo{
+      border-color:rgba(120,170,210,0.65);
+      box-shadow:0 0 0 2px rgba(120,170,210,0.18);
+      font-weight:700;
+      animation:turboPulse 0.9s ease-in-out infinite;
+    }
+
+    /* ---------- Buttons ---------- */
+    button{
+      border:0;
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:16px;
+      cursor:pointer;
+      transition:transform .06s ease, filter .15s ease;
+      user-select:none;
+    }
+    button:active{ transform:translateY(1px) scale(0.99); }
+
+    .pet{
+      background:#ff4f9a;
+      color:white;
+      font-weight:700;
+    }
+    .pet:hover{ filter:brightness(1.02); }
+
+    /* Reset (top-right, subtle) */
+    .reset{
+      position:absolute;
+      top:12px;
+      right:12px;
+      background: transparent;
+      color: #7a6772;
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(240, 168, 199, 0.55);
+      opacity: 0.85;
+    }
+    .reset:hover{
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    /* ---------- Message box ---------- */
+    .msg{
+      position: relative;
+      border: 1px solid rgba(210,170,190,0.6);
+      border-radius: 14px;
+
+      padding: 20px 14px 16px 28px;
+      min-height: 96px;
+
+      font-size: 20px;
+      line-height: 24px; /* text rhythm */
+
+      color: #3f2d38;
+
+      font-family: "Caveat", cursive;
+
+      box-shadow:
+        0 10px 24px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+
+      display: grid;
+      align-content: start;
+
+      /* doodle + notebook lines */
+      background-image:
+        url("heart-doodle.webp"),
+        repeating-linear-gradient(
+          to bottom,
+          #fffdf8,
+          #fffdf8 20px,
+          #f1dfe8 22px
+        );
+      background-repeat: no-repeat, repeat;
+      background-position: right 10px bottom 8px, top left;
+      background-size: 36px 36px, auto;
+    }
+
+    .msg::before{
+      content: "";
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 15px;
+      width: 2px;
+
+      background: linear-gradient(
+        to bottom,
+        rgba(255,140,180,0.35),
+        rgba(255,140,180,0.15)
+      );
+
+      border-radius: 1px;
+    }
+
+    .msg::after{
+      content:"";
+      position:absolute;
+      top:-6px;
+      left:50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width:60px;
+      height:14px;
+      background: rgba(255,235,180,0.65);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+      pointer-events:none;
+    }
+
+    /* ---------- Best combo patch (gingham) ---------- */
+.best{
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 14px 18px;
+  height: var(--bestH, auto);
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* label / flexible middle / sub */
+  justify-items: center;
+
+  /* key change: distribute the rows in the fixed height patch */
+  align-content: space-between;
+
+  row-gap: 10px;
+
+  border-radius: 16px;
+
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #ffeaf3 0px,
+      #ffeaf3 12px,
+      #ffd9ea 12px,
+      #ffd9ea 24px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.6) 0px,
+      rgba(255,255,255,0.6) 12px,
+      transparent 12px,
+      transparent 24px
+    );
+
+  border: 1px solid rgba(193,42,103,0.25);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+
+.bestLabel{
+  width: max-content;
+  max-width: 100%;
+  padding: 6px 14px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: #9b5a74;
+
+  background: #fff4fa;
+
+  border-radius: 10px;
+
+  /* stitched edge */
+  border: 1px dashed rgba(193,42,103,0.55);
+
+  /* subtle fabric depth */
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+
+  transform: rotate(-1.5deg);
+  position: relative;
+  display: inline-block; /* important: gives ::before a real box to hug */
+}
+
+.bestLabel::before{
+  content:"";
+  position:absolute;
+
+  /* pull it IN so it becomes an inner stitch, not a duplicate border */
+  inset: 3px;
+
+  border-radius: 8px;
+
+  /* inner stitch */
+  border: 1px dotted rgba(193,42,103,0.35);
+
+  /* tiny texture pop */
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+
+  pointer-events:none;
+}
+
+
+
+    .bestSub{
+      font-family: "Caveat", cursive;
+
+      font-size: 16px;
+      color: #a65a7f;
+
+      opacity: 0.9;
+
+      margin: 2px 0 0;
+    }
+
+
+    /* Bone badge: height controlled by --boneH (set from friendship box height) */
+    .boneBadge{
+      position: relative;
+      width: 100%;
+      max-width: 240px;
+      height: var(--boneH, 90px);
+      display: grid;
+      place-items: center;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,0.10));
+      margin-top: 0; /* was 2px */
+    }
+
+
+    .boneImg{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .boneText{
+      position: relative;
+      z-index: 1;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      color: #c12a67;
+      text-shadow:
+        0 1px 0 rgba(255,255,255,0.85),
+        0 -1px 0 rgba(193,42,103,0.12);
+      transform: translateY(2px);
+      user-select:none;
+      pointer-events:none;
+    }
+
+    /* Best combo "new record" pop */
+    @keyframes bestPop{
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.04); }
+      100%{ transform: scale(1); }
+    }
+    .boneBadge.is-new-record{
+      animation: bestPop 600ms ease-out;
+    }
+
+    /* ---------- Footer note ---------- */
+    .tiny{
+      margin-top: 16px;
+      font-size: 10.5px;
+      opacity: 0.55;
+      text-align: left;
+    }
+
+    .signature{
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+
+      font-family: "Caveat", cursive;
+
+      font-size: 20px;
+      color: #b86a8f;
+
+      opacity: 0.75;
+      font-weight: 800;
+      transform: rotate(-3deg);
+    }
+
+
+    /* ---------- Floating hearts (effects) ---------- */
+    .pop{
+      position:absolute;
+      font-size:16px;
+      opacity:0;
+      pointer-events:none;
+      animation:popFloat 0.85s ease-out forwards;
+      user-select:none;
+      white-space:nowrap;
+      text-shadow:0 1px 0 rgba(255,255,255,0.7);
+    }
+    @keyframes popFloat{
+      from{ transform:translateY(10px) scale(0.95); opacity:0; }
+      25%{ opacity:1; }
+      to{ transform:translateY(-18px) scale(1.06); opacity:0; }
+    }
+
+    @keyframes turboPulse{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-1px); }
+    }
+
+    /* ---------- Evil reset modal ---------- */
+    .modal[hidden]{ display:none; }
+
+    .modal{
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+    }
+
+    .modal-backdrop{
+      position:absolute;
+      inset:0;
+      background: rgba(10, 0, 12, 0.72);
+    }
+
+    .modal-panel{
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(420px, 92vw);
+      background: rgba(22, 10, 18, 0.92);
+      border: 1px solid rgba(255, 79, 154, 0.35);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+      padding: 14px 14px 12px;
+      color: #ffe9f3;
+    }
+
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .modal-title{
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .modal-x{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #ffe9f3;
+      border-radius: 12px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .modal-evil{
+      font-size: 16px;
+      font-weight: 800;
+      color: #ff7bb6;
+      text-shadow: 0 0 14px rgba(255, 79, 154, 0.28);
+      margin-bottom: 4px;
+    }
+
+    .modal-sub{
+      font-size: 12px;
+      opacity: 0.82;
+      margin-bottom: 10px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap: 10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .modal-btn{
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .modal-btn.no{
+      background: rgba(255,255,255,0.10);
+      color: #ffe9f3;
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .modal-btn.yes{
+      background: #ff4f9a;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" aria-label="Puppy Valentine">
+    <button class="reset" id="resetBtn" type="button" title="Resets pets to zero">reset</button>
+
+    <h1 id="title">happy valentine’s day, kezia!</h1>
+    <p class="sub">click <strong>PET</strong> or <strong>space</strong>/<strong>enter</strong> to pet the puppy...</p>
+
+    <div class="row">
+      <div class="left">
+        <div class="hearts" id="hearts"></div>
+
+        <div class="screenWrap">
+          <pre id="art" aria-live="polite"></pre>
+        </div>
+
+        <div class="poke-status" id="pokeStatus"></div>
+
+        <div class="status">
+          <span class="pill" id="petCount">Pets: 0</span>
+          <span class="pill" id="combo">Combo: 0</span>
+        </div>
+
+        <div class="tiny">(Double-click this file anytime — she remembers.)</div>
+      </div>
+
+      <div class="right">
+        <button class="pet" id="petBtn" type="button">PET 🐾</button>
+
+        <div class="msg" id="messageBox"></div>
+
+        <div class="best" id="bestBox" aria-label="Best combo">
+          <div class="bestLabel">Best combo</div>
+
+          <div class="boneBadge" aria-label="Best combo badge">
+            <img class="boneImg" src="Dog-Bone.svg" alt="" aria-hidden="true">
+            <span class="boneText" id="bestComboNum">0</span>
+          </div>
+
+          <div class="bestSub" id="bestSub">Keep petting!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="signature" id="sig">xoxo, <strong>kaylee</strong></div>
+  </div>
+
+  <!-- Reset confirmation modal (hidden by default) -->
+  <div class="modal" id="resetModal" hidden>
+    <div class="modal-backdrop" data-close="1"></div>
+
+    <div class="modal-panel"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="resetTitle"
+         aria-describedby="resetDesc">
+
+      <div class="modal-header">
+        <div class="modal-title" id="resetTitle">⚠️ Are you sure?</div>
+        <button class="modal-x" type="button" id="resetNoX" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-evil" id="resetDesc">Are you sure you want to abandon puppy?</div>
+        <div class="modal-sub">This will wipe all pets and combos.</div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn no" id="resetNoBtn">No, I'll keep trying.</button>
+        <button type="button" class="modal-btn yes" id="resetYesBtn">Yes… abandon puppy.</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**********************************************************************
+     * Puppy Valentine — single-file interactive gift
+     * - ASCII puppy + wag animation
+     * - Friendship hearts + unlock messages
+     * - Combo + best combo (saved to localStorage)
+     * - Heart pops + heart explosions
+     * - Custom “evil” reset confirmation modal
+     **********************************************************************/
+
+    /* ---------- ASCII art frames ---------- */
+    const PUPPY_A = String.raw`
+⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢀⡤⠞⠋⠉⠀⠀⠀⠀⠀⠀⠀⠉⠙⠳⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠱⡆⠀⠀⠀⠀⠀⠀⠀⠀
+⢠⠇⠀⢰⠆⢀⣀⣀⠀⠀⠀⠀⠤⠤⠄⠀⠰⡄⠀⢸⡀⠀⠀⠀⠀⠀⠀⠀
+⢸⠀⠀⢸⠀⠀⢰⣶⡀⠀⠀⠀⢠⣶⡀⠀⠀⡇⠀⢸⠂⠀⠀⠀⠀⠀⠀⠀
+⠈⢧⣀⢸⡄⠀⠀⠉⠀⠀⠀⠀⠀⠉⠀⠀⢠⡇⣠⡞⠁⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠉⠙⣇⠀⠂⠀⠀⢶⣶⣶⠀⠄⠀⠀⣾⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠘⢦⡀⠀⠀⠀⠀⠀⠀⠀⢀⣼⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢠⠞⠓⠤⣤⣀⣀⣠⣤⠴⠚⠉⠑⠲⢤⡀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢸⠀⠀⣀⣠⣀⣀⣠⣀⡀⠀⠀⠀⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢸⠀⠰⡇⠀⠈⠁⠀⠈⡧⠀⠀⠀⠀⠀⠀⠀⠈⢦⠀⠀⢠⠖⡆
+⠀⠀⠀⠀⢸⠀⠀⠑⢦⡀⠀⣠⠞⠁⠀⢸⠀⠀⠀⠀⠀⠀⠈⣷⠞⠋⢠⠇
+⠀⠀⠀⠀⢸⠀⠀⠀⠀⠙⡞⠁⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⢹⢀⡴⠋⠀
+⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⡞⠉⠀⠀⠀
+⠀⠀⠀⠀⢸⡀⠀⠀⠀⢠⣧⠀⠀⠀⠀⣸⡀⠀⠀⠀⠀⣠⠞⠁⠀⠀⠀⠀
+⠀⠀⠀⠀⠈⠳⠦⠤⠴⠛⠈⠓⠤⠤⠞⠁⠉⠛⠒⠚⠋⠁⠀⠀⠀
+`;
+
+    const PUPPY_B = String.raw`
+⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠀⠀
+⠀⠀⢀⡤⠞⠋⠉⠀⠀⠀⠀⠀⠀⠀⠉⠙⠳⣄⣀⡤⠞⢹⠀⠀⠀⠀⠀⠀
+⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡞⠀⠀⠀⠀⠀⠀
+⢠⠇⠀⢰⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⣄⡤⠴⠋⠀⠀⠀⠀⠀⠀⠀
+⢸⠀⠀⢸⠀⢀⡴⠶⠦⡄⠀⢠⠶⠶⣄⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠈⢧⣀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠉⠙⣇⠀⠂⠀⠀⢶⣶⣶⠀⠄⠀⠀⣾⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠘⢦⡀⠀⠳⠤⠶⠤⠞⠀⢀⣼⡁⠀⠀⠀⠀⠀⠀⠀⠀⠠⡄⠀
+⠀⠀⠀⠀⢠⠞⠓⠤⣤⣀⣀⣠⣤⠴⠚⠉⠑⠲⢤⡀⠀⠀⠀⢹⡗⣆⠸⠀
+⠀⠀⠀⠀⢸⠀⠀⣀⣠⣀⣀⣠⣀⡀⠀⠀⠀⠀⠀⠈⠳⣄⠀⠀⡇⠈⣇⠀
+⠀⠀⠀⠀⢸⠀⠰⡇⠀⠈⠁⠀⠈⡧⠀⠀⠀⠀⠀⠀⠀⠈⢦⠀⡇⠀⢸⠀
+⠀⠀⠀⠀⢸⠀⠀⠑⢦⡀⠀⣠⠞⠁⠀⢸⠀⠀⠀⠀⠀⠀⠈⣿⠇⠀⢸⠀
+⠀⠀⠀⠀⢸⠀⠀⠀⠀⠙⡞⠁⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⢹⠀⣠⠇⡆
+⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⡞⠋⢁⡼⠁
+⠀⠀⠀⠀⢸⡀⠀⠀⠀⢠⣧⠀⠀⠀⠀⣸⡀⠀⠀⠀⠀⣠⠞⠁⠀⠁⠀⠀
+⠀⠀⠀⠀⠈⠳⠦⠤⠴⠛⠈⠓⠤⠤⠞⠁⠉⠛⠒⠚⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀
+`;
+
+    /* ---------- Cosmetic heart line + effects ---------- */
+    const HEARTS = ["♡","❊","♡","✧","◦"];
+    function heartsLine(n = 18){
+      let out = [];
+      for (let i=0;i<n;i++) out.push(HEARTS[Math.floor(Math.random()*HEARTS.length)]);
+      return out.join(" ");
+    }
+
+    /* ---------- Friendship system ---------- */
+    const MAX_FRIENDSHIP = 255;
+    function getLevel(friendship){
+      if (friendship < 20) return 1;
+      if (friendship < 40) return 2;
+      if (friendship < 70) return 3;
+      if (friendship < 110) return 4;
+      if (friendship < 160) return 5;
+      if (friendship < 210) return 6;
+      return 7;
+    }
+
+    /* ---------- Persistence keys ---------- */
+    const STORAGE_KEY = "puppy_valentine_state_v1";
+    const BEST_KEY = "puppy_best_combo";
+
+    /* ---------- Load saved state (safe) ---------- */
+    function safeLoadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { pets: 0, friendship: 0 };
+
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== "object") return { pets: 0, friendship: 0 };
+
+        return obj;
+      } catch {
+        // If corrupted, reset it so the page still runs
+        localStorage.removeItem(STORAGE_KEY);
+        return { pets: 0, friendship: 0 };
+      }
+    }
+
+    const savedState = safeLoadState();
+    let pets = Math.max(0, Math.floor(Number(savedState.pets) || 0));
+    let friendship = Math.max(
+      0,
+      Math.min(Math.floor(Number(savedState.friendship) || 0), MAX_FRIENDSHIP)
+    );
+    let bestCombo = Math.max(0, Math.floor(Number(localStorage.getItem(BEST_KEY)) || 0));
+
+    /* ---------- Combo state ---------- */
+    let combo = 0;
+    let comboTimer = null;
+    let animating = false;
+
+    /* ---------- Unlock tracking ---------- */
+    let lastHeartsFilled = -1;
+
+    /* ---------- Cached DOM refs ---------- */
+    const leftBox    = document.querySelector(".left");
+    const art        = document.getElementById("art");
+    const hearts     = document.getElementById("hearts");
+    const petCount   = document.getElementById("petCount");
+    const comboEl    = document.getElementById("combo");
+    const messageBox = document.getElementById("messageBox");
+    const petBtn     = document.getElementById("petBtn");
+
+    const resetBtn   = document.getElementById("resetBtn");
+    const pokeStatus = document.getElementById("pokeStatus");
+
+    const bestBoxEl  = document.getElementById("bestBox");
+    const bestNumEl  = document.getElementById("bestComboNum");
+    const bestSubEl  = document.getElementById("bestSub");
+    const sigEl = document.getElementById("sig");
+
+    const resetModal = document.getElementById("resetModal");
+    const resetNoBtn = document.getElementById("resetNoBtn");
+    const resetYesBtn = document.getElementById("resetYesBtn");
+    const resetNoX = document.getElementById("resetNoX");
+
+    /* ---------- Art measurement (for pop placement) ---------- */
+    let artBox = null;
+    const POP_CENTER_OFFSET_X = 10;
+
+    function measureArt(){
+      const artRect = art.getBoundingClientRect();
+      const leftRect = leftBox.getBoundingClientRect();
+      if (!artRect.width || !artRect.height) return;
+
+      artBox = {
+        x: artRect.left - leftRect.left,
+        y: artRect.top  - leftRect.top,
+        w: artRect.width,
+        h: artRect.height
+      };
+    }
+
+    /* ---------- Typewriter-ish message box ---------- */
+    let msgTimer = null;
+    let messageLockUntil = 0;
+    let msgToken = 0;
+
+    function setMessage(html, opts = {}){
+      const now = Date.now();
+      const lockMs = opts.lockMs ?? 0;
+
+      if (now < messageLockUntil && !opts.force) return;
+      if (lockMs) messageLockUntil = now + lockMs;
+
+      clearTimeout(msgTimer);
+
+      msgToken += 1;
+      const myToken = msgToken;
+
+      messageBox.innerHTML = "";
+
+      const parts = String(html).split(/<br\s*\/?>/i);
+      let i = 0;
+
+      const baseDelay = opts.delayMs ?? 360;
+      const jitter = opts.jitterMs ?? 120;
+
+      function reveal(){
+        if (myToken !== msgToken) return;
+        if (i >= parts.length) return;
+        messageBox.innerHTML += (i ? "<br>" : "") + parts[i];
+        i += 1;
+        msgTimer = setTimeout(reveal, baseDelay + Math.floor(Math.random() * jitter));
+      }
+      reveal();
+    }
+
+    /* ---------- Save ---------- */
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ pets, friendship }));
+    }
+
+    /* ---------- Best combo renderer ---------- */
+    function renderBestCombo(){
+      bestNumEl.textContent = String(bestCombo);
+    }
+        /* ---------- Layout sync (PATCH TOP under message, PATCH BOTTOM matches friendship bottom) ---------- */
+    function syncBoneHeightToFriendship(){
+      const pokeRect = pokeStatus.getBoundingClientRect();
+      const h = Math.round(pokeRect.height);
+      bestBoxEl.style.setProperty("--boneH", h + "px");
+    }
+
+    function syncPatchBottomToFriendship(){
+      const patchRect = bestBoxEl.getBoundingClientRect();
+      const pokeRect = pokeStatus.getBoundingClientRect();
+
+      // If the columns have wrapped/stacked, don't force a height.
+      // (Patch and status are no longer aligned visually.)
+      if (patchRect.top > pokeRect.bottom) {
+        bestBoxEl.style.setProperty("--bestH", "auto");
+        return;
+      }
+
+      const OFFSET_PX = 0;
+      const desiredH = Math.round((pokeRect.bottom - patchRect.top) + OFFSET_PX);
+      const clamped = Math.max(140, Math.min(520, desiredH));
+      bestBoxEl.style.setProperty("--bestH", clamped + "px");
+    }
+
+    function syncRightColumnLayout(){
+      if (!bestBoxEl || !pokeStatus) return;
+      // Run bone sizing first, then patch sizing
+      syncBoneHeightToFriendship();
+      syncPatchBottomToFriendship();
+    }
+
+
+    /* ---------- Friendship bar renderer ---------- */
+    function renderStatus(){
+      const level = getLevel(friendship);
+
+      const totalHearts = 10;
+      const totalTicks = totalHearts * 2;
+      const ticksFilled = Math.floor((friendship / MAX_FRIENDSHIP) * totalTicks);
+
+      function heartSVG(fillPercent, id){
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="${fillPercent}%" stop-color="#ff4f9a"></stop>
+                <stop offset="${fillPercent}%" stop-color="transparent"></stop>
+              </linearGradient>
+            </defs>
+            <path d="M12 21s-7.2-4.5-9.6-8.6C.4 9 .9 5.9 3.2 4.3c2-1.4 4.6-.9 6.1.8L12 7.9l2.7-2.8c1.5-1.7 4.1-2.2 6.1-.8 2.3 1.6 2.8 4.7.8 8.1C19.2 16.5 12 21 12 21z"
+              fill="url(#g${id})"
+              stroke="#c12a67"
+              stroke-width="1.6"
+              stroke-linejoin="round"></path>
+          </svg>
+        `;
+      }
+
+      let heartsHTML = "";
+      for (let i=0;i<totalHearts;i++){
+        const heartTicks = ticksFilled - i * 2;
+        let fill = 0;
+        if (heartTicks >= 2) fill = 100;
+        else if (heartTicks === 1) fill = 50;
+        heartsHTML += heartSVG(fill, `hb-${i}`);
+      }
+
+      pokeStatus.innerHTML = `
+        <strong>PUPPY</strong> &nbsp; Lv. ${level}<br>
+        Friendship: ${friendship} / ${MAX_FRIENDSHIP}<br>
+        <span class="hearts-bar">${heartsHTML}</span>
+      `;
+    }
+
+    /* ---------- Floating heart effects ---------- */
+    function popOneHeart(){
+      const pop = document.createElement("div");
+      pop.className = "pop";
+      pop.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+
+      if (!artBox) measureArt();
+      if (!artBox) return;
+
+      const jitterX = (Math.random() * 34) - 17;
+      pop.style.left = (artBox.x + artBox.w/2 - POP_CENTER_OFFSET_X + jitterX) + "px";
+      pop.style.top  = (artBox.y + 18) + "px";
+
+      leftBox.appendChild(pop);
+      setTimeout(() => pop.remove(), 900);
+    }
+
+    function heartExplosion(){
+      const bursts = 14;
+      if (!artBox) measureArt();
+      if (!artBox) return;
+
+      for (let i=0;i<bursts;i++){
+        setTimeout(() => {
+          const pop = document.createElement("div");
+          pop.className = "pop";
+          pop.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+
+          const spreadX = (Math.random() * artBox.w) - (artBox.w / 2);
+          const spreadY = (Math.random() * 50);
+
+          pop.style.left = (artBox.x + artBox.w/2 - POP_CENTER_OFFSET_X + spreadX) + "px";
+          pop.style.top  = (artBox.y + 10 + spreadY) + "px";
+          pop.style.animationDuration = (0.75 + Math.random() * 0.25) + "s";
+
+          leftBox.appendChild(pop);
+          setTimeout(() => pop.remove(), 1000);
+        }, i * 18);
+      }
+    }
+
+    /* ---------- Unlock messages ---------- */
+    function updateUnlocks(){
+      const totalHearts = 10;
+      const totalTicks = totalHearts * 2;
+
+      const ticksFilled = Math.round((friendship / MAX_FRIENDSHIP) * totalTicks);
+      const heartsFilled = Math.floor(ticksFilled / 2);
+
+      if (heartsFilled === lastHeartsFilled) return;
+      lastHeartsFilled = heartsFilled;
+
+      const MESSAGES = [
+        "This puppy misses you.<br><strong>Pet her to send love.</strong>",
+        "A tiny tail wag.<br><strong>She feels a little braver.</strong>",
+        "She leans into your hand.<br><strong>You’re doing great.</strong>",
+        "<strong>WOOF WOOF!!</strong>",
+        "Tail status: <strong>WAGGING</strong>",
+        "She follows you around now.<br><strong>Just casually.</strong>",
+        "EEEEEEEEEEEEEEEEEEE!!!!",
+        "She trusts you now.",
+        "<strong>She curls up in your lap.</strong>",
+        "She is so happy to have met you.<br><strong>WOOF!</strong>",
+        "<strong>Her heart is yours.</strong>"
+      ];
+
+      const idx = Math.min(heartsFilled, MESSAGES.length - 1);
+      setMessage(MESSAGES[idx], { lockMs: 900 });
+
+    }
+
+    /* ---------- Time messages ---------- */
+    function showTimeMessage(){
+      const h = new Date().getHours();
+
+      let msg = null;
+      if (h >= 5 && h < 12) {
+        msg = "She just woke up and looked around for you.";
+      } else if (h >= 12 && h < 17) {
+        msg = "She’s ready for an afternoon nap!";
+      } else if (h >= 17 && h < 22) {
+        msg = "She’s getting sleepy, but her tail still wags.";
+      } else {
+        msg = "She stayed up just in case you came.";
+      }
+
+      setMessage(msg, { lockMs: 800 });
+    }
+
+    /* ---------- Puppy coloring (simple mapping) ---------- */
+    function colorizeArt(frame){
+      const PATTERNS = [
+        { cls:"p-black", text:"⢀⡴⠶⠦⡄⠀⢠⠶⠶⣄" },
+        { cls:"p-black", text:"⢶⣶⣶" },
+        { cls:"p-dark",  text:"⠳⠤⠶⠤⠞" },
+        { cls:"p-dark",  text:"⢀⣀⣀⠀⠀⠀⠀⠤⠤⠄" },
+        { cls:"p-dark",  text:"⢰⣶⡀⠀⠀⠀⢠⣶⡀" }
+      ];
+      const DEFAULT_CLS = "p-brown";
+
+      const lines = frame.split("\n");
+      const outLines = [];
+
+      for (const line of lines){
+        const classes = Array(line.length).fill(DEFAULT_CLS);
+
+        for (const pat of PATTERNS){
+          let start = 0;
+          while (true){
+            const idx = line.indexOf(pat.text, start);
+            if (idx === -1) break;
+
+            for (let i=idx;i<idx+pat.text.length;i++){
+              if (line[i] !== " ") classes[i] = pat.cls;
+            }
+            start = idx + 1;
+          }
+        }
+
+        let html = "";
+        for (let i=0;i<line.length;i++){
+          const ch = line[i];
+          if (ch === " ") html += " ";
+          else html += `<span class="${classes[i] || DEFAULT_CLS}">${ch}</span>`;
+        }
+        outLines.push(html);
+      }
+
+      return outLines.join("\n");
+    }
+
+    function setArt(frame){
+      art.innerHTML = colorizeArt(frame);
+    }
+
+    function updateSignature(){
+      if (!sigEl) return;
+
+      if (friendship >= MAX_FRIENDSHIP){
+        sigEl.innerHTML = `xoxo always, <strong>kaylee</strong>`;
+      } else {
+        sigEl.innerHTML = `xoxo, <strong>kaylee</strong>`;
+      }
+    }
+
+
+    /* ---------- Main render ---------- */
+    function render(){
+      setArt((pets > 0) ? PUPPY_B : PUPPY_A);
+
+      hearts.textContent = heartsLine();
+      petCount.textContent = `Pets: ${pets}`;
+
+      comboEl.textContent = `Combo: ${combo}`;
+      comboEl.classList.toggle("turbo", combo >= 6);
+
+      renderBestCombo();
+      renderStatus();
+      updateSignature();
+      measureArt();
+      // IMPORTANT: wait one frame so pokeStatus innerHTML/layout updates,
+      // then sync bone height + patch height.
+      requestAnimationFrame(syncRightColumnLayout);
+    }
+
+    /* ---------- Wag animation ---------- */
+    async function animateWag(){
+      if (animating) return;
+      animating = true;
+      petBtn.disabled = true;
+
+      for (let i=0;i<8;i++){
+        setArt((i % 2 === 0) ? PUPPY_A : PUPPY_B);
+        hearts.textContent = heartsLine();
+        await new Promise(r => setTimeout(r, 85));
+      }
+
+      setArt(PUPPY_B);
+      hearts.textContent = heartsLine();
+
+      petBtn.disabled = false;
+      animating = false;
+    }
+
+    /* ---------- Pet action ---------- */
+    function pet(){
+      pets += 1;
+      save();
+
+      // Friendship gain: fast early, MUCH slower late
+      let gain = 0;
+
+      if (friendship < 60) {
+        gain = 2;
+      } else if (friendship < 140) {
+        gain = 1;
+      } else if (friendship < 200) {
+        gain = (pets % 2 === 0) ? 1 : 0;   // +1 every 2 pets
+      } else if (friendship < 240) {
+        gain = (pets % 4 === 0) ? 1 : 0;   // +1 every 4 pets
+      } else {
+        gain = (pets % 8 === 0) ? 1 : 0;   // +1 every 8 pets (endgame)
+      }
+
+      friendship = Math.min(friendship + gain, MAX_FRIENDSHIP);
+      updateSignature();
+
+      // Effects
+      popOneHeart();
+      if (pets % 10 === 0) heartExplosion();
+
+      // Combo logic
+      combo += 1;
+
+      // Best combo
+      if (combo > bestCombo){
+        bestCombo = combo;
+        localStorage.setItem(BEST_KEY, String(bestCombo));
+        renderBestCombo();
+
+        bestSubEl.textContent = "✧ NEW RECORD! ✧";
+
+        const boneBadge = bestBoxEl.querySelector(".boneBadge");
+
+        boneBadge.classList.remove("is-new-record");
+        void boneBadge.offsetWidth;
+        boneBadge.classList.add("is-new-record");
+
+
+        setTimeout(() => {
+          bestSubEl.textContent = "Keep petting!";
+          boneBadge.classList.remove("is-new-record");
+        }, 1400);
+
+      }
+
+      // Combo timeout
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => {
+        combo = 0;
+        comboEl.classList.remove("turbo");
+        comboEl.textContent = `Combo: ${combo}`;
+      }, 1200);
+
+      updateUnlocks();
+      render();
+      animateWag();
+    }
+
+    /* ---------- Reset modal controls ---------- */
+    function openResetModal(){
+      resetModal.hidden = false;
+      setTimeout(() => resetNoBtn.focus(), 0);
+    }
+    function closeResetModal(){ resetModal.hidden = true; }
+
+    function resetAll(){
+      pets = 0;
+      friendship = 0;
+      combo = 0;
+      bestCombo = 0;
+
+      // clear saved state
+      save();
+      localStorage.removeItem(BEST_KEY);
+
+      // reset UI bits
+      bestSubEl.textContent = "Keep petting!";
+      comboEl.classList.remove("turbo");
+      lastHeartsFilled = -1;
+      const boneBadge = bestBoxEl.querySelector(".boneBadge");
+      if (boneBadge) boneBadge.classList.remove("is-new-record");
+
+      updateSignature(); 
+      render();
+      updateUnlocks();
+    }
+
+    /* ---------- Events ---------- */
+    petBtn.addEventListener("click", pet);
+    resetBtn.addEventListener("click", openResetModal);
+
+    resetNoBtn.addEventListener("click", closeResetModal);
+    resetNoX.addEventListener("click", closeResetModal);
+
+    resetYesBtn.addEventListener("click", () => {
+      closeResetModal();
+      resetAll();
+    });
+
+    resetModal.addEventListener("click", (e) => {
+      if (e.target && e.target.matches("[data-close='1']")) closeResetModal();
+    });
+
+    window.addEventListener("resize", () => {
+      measureArt();
+      requestAnimationFrame(syncRightColumnLayout);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      // Close modal on Escape
+      if (e.key === "Escape" && !resetModal.hidden) {
+        closeResetModal();
+        return;
+      }
+
+      // Don't pet while modal is open
+      if (!resetModal.hidden) return;
+
+      // Pet on Space/Enter (ignore auto-repeat)
+      if (e.repeat) return;
+
+      if (e.code === "Space" || e.code === "Enter") {
+        e.preventDefault();
+        pet();
+      }
+    });
+
+
+    /* ---------- Boot ---------- */
+    render();
+    requestAnimationFrame(() => {
+      syncRightColumnLayout();
+      showTimeMessage();
+      updateSignature(); 
+    });
+  </script>
+</body>
+</html>
